@@ -29,6 +29,25 @@ LOCAL_C_INCLUDES := $(SDL_PATH)/include \
 		    $(LOCAL_PATH)/../game_shared
 
 LOCAL_SRC_FILES := agrunt.cpp airtank.cpp \
+           bonewheel.cpp \
+           sawnoff.cpp \
+           cross.cpp \
+           bigsmoke.cpp \
+           pepsigun.cpp \
+           needle.cpp \
+           katana.cpp \
+           evilsci.cpp \
+           sniper.cpp \
+           glock2.cpp \
+           mariozombie.cpp \
+           megachav.cpp \
+           pink_panthera.cpp \
+           shrek.cpp \
+           skeleton.cpp \
+           skrillex.cpp \
+           superchav.cpp \
+           terror.cpp \
+           zombozo.cpp \
            aflock.cpp \
            animating.cpp \
            animation.cpp \
@@ -124,6 +143,7 @@ LOCAL_SRC_FILES := agrunt.cpp airtank.cpp \
            world.cpp \
            xen.cpp \
            zombie.cpp \
+           rock.cpp \
 	   ../pm_shared/pm_debug.c \
 	   ../pm_shared/pm_math.c \
 	   ../pm_shared/pm_shared.c

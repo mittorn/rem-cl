@@ -302,24 +302,42 @@ void W_Precache( void )
 
 	// shotgun
 	UTIL_PrecacheOtherWeapon( "weapon_shotgun" );
+	UTIL_PrecacheOtherWeapon( "weapon_hammer");
+	UTIL_PrecacheOtherWeapon( "weapon_pepsigun" );
+	UTIL_PrecacheOther( "ammo_pepsi" );
 	UTIL_PrecacheOther( "ammo_buckshot" );
 
+	//needle
+	UTIL_PrecacheOtherWeapon( "weapon_needle"); 
+	UTIL_PrecacheOtherWeapon( "weapon_glock2"); 
 	// crowbar
 	UTIL_PrecacheOtherWeapon( "weapon_crowbar" );
+
+UTIL_PrecacheOtherWeapon( "weapon_snipars" ); 
+UTIL_PrecacheOther( "ammo_snipars" );
 
 	// glock
 	UTIL_PrecacheOtherWeapon( "weapon_9mmhandgun" );
 	UTIL_PrecacheOther( "ammo_9mmclip" );
 
+
+	// sawnoff
+	UTIL_PrecacheOtherWeapon( "weapon_sawnoff" );
+            UTIL_PrecacheOther( "ammo_cockshot" );
 	// mp5
 	UTIL_PrecacheOtherWeapon( "weapon_9mmAR" );
 	UTIL_PrecacheOther( "ammo_9mmAR" );
 	UTIL_PrecacheOther( "ammo_ARgrenades" );
 
+	//Sawnoff
+	UTIL_PrecacheOtherWeapon( "weapon_sawnoff" );
+
 #if !defined( OEM_BUILD ) && !defined( HLDEMO_BUILD )
 	// python
 	UTIL_PrecacheOtherWeapon( "weapon_357" );
+	UTIL_PrecacheOtherWeapon( "weapon_katana" );
 	UTIL_PrecacheOther( "ammo_357" );
+	UTIL_PrecacheOtherWeapon( "weapon_rock" );
 
 	// gauss
 	UTIL_PrecacheOtherWeapon( "weapon_gauss" );

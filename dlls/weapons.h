@@ -54,8 +54,24 @@ public:
 
 	BOOL m_fRegisteredSound;// whether or not this grenade has issued its DANGER sound to the world sound list yet.
 };
+class CGrenadeRock : public CBaseMonster
+{
+public:
+	void Spawn( void );
 
-// constant items
+	typedef enum { SATCHEL_DETONATE = 0, SATCHEL_RELEASE } SATCHELCODE;
+
+	static CGrenade *ShootTimed( entvars_t *pevOwner, Vector vecStart, Vector vecVelocity, float time );
+
+	void EXPORT BounceTouch( CBaseEntity *pOther );
+
+	virtual void BounceSound( void );
+
+	BOOL m_fRegisteredSound;// whether or not this grenade has issued its DANGER sound to the world sound list yet.
+};
+
+
+// constant itemsfg
 #define ITEM_HEALTHKIT		1
 #define ITEM_ANTIDOTE		2
 #define ITEM_SECURITY		3
@@ -77,14 +93,23 @@ public:
 #define WEAPON_TRIPMINE			13
 #define	WEAPON_SATCHEL			14
 #define	WEAPON_SNARK			15
+#define WEAPON_SAWNOFF			16
+#define WEAPON_NEEDLE			17
+#define WEAPON_SNIPARS 18
+#define WEAPON_GLOCK2 19
+#define WEAPON_KATANA 20
+#define WEAPON_ROCK 21
+#define WEAPON_PEPSIGUN 22
+#define WEAPON_HAMMER 	23
+
 
 #define WEAPON_ALLWEAPONS		(~(1<<WEAPON_SUIT))
 
 #define WEAPON_SUIT				31	// ?????
 
 #define MAX_WEAPONS			32
-
-#define MAX_NORMAL_BATTERY	100
+			
+#define MAX_NORMAL_BATTERY	500
 
 // weapon weight factors (for auto-switching)   (-1 = noswitch)
 #define CROWBAR_WEIGHT		0
@@ -101,20 +126,25 @@ public:
 #define SNARK_WEIGHT		5
 #define SATCHEL_WEIGHT		-10
 #define TRIPMINE_WEIGHT		-10
+#define SAWNOFF_WEIGHT	16
+#define SNIPARS_WEIGHT 10
+#define PEPSIGUN_WEIGHT 10
 
 // weapon clip/carry ammo capacities
-#define URANIUM_MAX_CARRY		100
-#define	_9MM_MAX_CARRY			250
+#define URANIUM_MAX_CARRY		10000
+#define	_9MM_MAX_CARRY			25000
 #define _357_MAX_CARRY			36
-#define BUCKSHOT_MAX_CARRY		125
-#define BOLT_MAX_CARRY			50
-#define ROCKET_MAX_CARRY		5
-#define HANDGRENADE_MAX_CARRY	10
+#define BUCKSHOT_MAX_CARRY		200
+#define BOLT_MAX_CARRY			500
+#define ROCKET_MAX_CARRY		WEAPON_NOCLIP
+#define HANDGRENADE_MAX_CARRY	200
 #define SATCHEL_MAX_CARRY		5
 #define TRIPMINE_MAX_CARRY		5
 #define SNARK_MAX_CARRY			15
-#define HORNET_MAX_CARRY		8
-#define M203_GRENADE_MAX_CARRY	10
+#define HORNET_MAX_CARRY		50
+#define M203_GRENADE_MAX_CARRY	10000
+#define _SNIPARS_MAX_CARRY 30
+#define PEPSIGUN_MAX_CARRY 200
 
 // the maximum amount of ammo each weapon's clip can hold
 #define WEAPON_NOCLIP			-1
@@ -122,11 +152,11 @@ public:
 //#define CROWBAR_MAX_CLIP		WEAPON_NOCLIP
 #define GLOCK_MAX_CLIP			17
 #define PYTHON_MAX_CLIP			6
-#define MP5_MAX_CLIP			50
-#define MP5_DEFAULT_AMMO		25
+#define MP5_MAX_CLIP			5000
+#define MP5_DEFAULT_AMMO		5000
 #define SHOTGUN_MAX_CLIP		8
-#define CROSSBOW_MAX_CLIP		5
-#define RPG_MAX_CLIP			1
+#define CROSSBOW_MAX_CLIP		50
+#define RPG_MAX_CLIP			500000
 #define GAUSS_MAX_CLIP			WEAPON_NOCLIP
 #define EGON_MAX_CLIP			WEAPON_NOCLIP
 #define HORNETGUN_MAX_CLIP		WEAPON_NOCLIP
@@ -134,36 +164,44 @@ public:
 #define SATCHEL_MAX_CLIP		WEAPON_NOCLIP
 #define TRIPMINE_MAX_CLIP		WEAPON_NOCLIP
 #define SNARK_MAX_CLIP			WEAPON_NOCLIP
+#define SAWNOFF_MAX_CLIP		4
+#define SNIPARS_MAX_CLIP 5
+#define PEPSIGUN_MAX_CLIP 8
+
 
 // the default amount of ammo that comes with each gun when it spawns
 #define GLOCK_DEFAULT_GIVE			17
 #define PYTHON_DEFAULT_GIVE			6
-#define MP5_DEFAULT_GIVE			25
-#define MP5_DEFAULT_AMMO			25
-#define MP5_M203_DEFAULT_GIVE		0
+#define MP5_DEFAULT_GIVE			2500
+#define MP5_DEFAULT_AMMO			2500
+#define MP5_M203_DEFAULT_GIVE		1000
 #define SHOTGUN_DEFAULT_GIVE		12
-#define CROSSBOW_DEFAULT_GIVE		5
-#define RPG_DEFAULT_GIVE			1
-#define GAUSS_DEFAULT_GIVE			20
-#define EGON_DEFAULT_GIVE			20
-#define HANDGRENADE_DEFAULT_GIVE	5
+#define CROSSBOW_DEFAULT_GIVE		50
+#define RPG_DEFAULT_GIVE			10000
+#define GAUSS_DEFAULT_GIVE			1000
+#define EGON_DEFAULT_GIVE			1000
+#define HANDGRENADE_DEFAULT_GIVE	50
 #define SATCHEL_DEFAULT_GIVE		1
 #define TRIPMINE_DEFAULT_GIVE		1
 #define SNARK_DEFAULT_GIVE			5
 #define HIVEHAND_DEFAULT_GIVE		8
+#define SAWNOFF_DEFAULT_GIVE		125
+#define SNIPARS_DEFAULT_GIVE 10
+#define PEPSIGUN_DEFAULT_GIVE 24
 
 // The amount of ammo given to a player by an ammo item.
-#define AMMO_URANIUMBOX_GIVE	20
+#define AMMO_URANIUMBOX_GIVE	2000
 #define AMMO_GLOCKCLIP_GIVE		GLOCK_MAX_CLIP
 #define AMMO_357BOX_GIVE		PYTHON_MAX_CLIP
 #define AMMO_MP5CLIP_GIVE		MP5_MAX_CLIP
 #define AMMO_CHAINBOX_GIVE		200
-#define AMMO_M203BOX_GIVE		2
+#define AMMO_M203BOX_GIVE		999
 #define AMMO_BUCKSHOTBOX_GIVE	12
 #define AMMO_CROSSBOWCLIP_GIVE	CROSSBOW_MAX_CLIP
 #define AMMO_RPGCLIP_GIVE		RPG_MAX_CLIP
-#define AMMO_URANIUMBOX_GIVE	20
+#define AMMO_URANIUMBOX_GIVE	2000
 #define AMMO_SNARKBOX_GIVE		5
+#define AMMO_SNIPARSBOX_GIVE SNIPARS_MAX_CLIP
 
 // bullet types
 typedef	enum
@@ -174,6 +212,8 @@ typedef	enum
 	BULLET_PLAYER_357, // python
 	BULLET_PLAYER_BUCKSHOT, // shotgun
 	BULLET_PLAYER_CROWBAR, // crowbar swipe
+	BULLET_PLAYER_SNIPARS,
+	BULLET_PLAYER_PEPSI,
 
 	BULLET_MONSTER_9MM,
 	BULLET_MONSTER_MP5,
@@ -298,7 +338,7 @@ public:
 	BOOL AddPrimaryAmmo( int iCount, char *szName, int iMaxClip, int iMaxCarry );
 	BOOL AddSecondaryAmmo( int iCount, char *szName, int iMaxCarry );
 
-	virtual void UpdateItemInfo( void ) {};	// updates HUD state
+	virtual void UpdateItemInfo( void ) { };	// updates HUD state
 
 	int m_iPlayEmptySound;
 	int m_fFireOnEmpty;		// True when the gun is empty and the player is still holding down the
@@ -493,6 +533,7 @@ public:
 	int GetItemInfo(ItemInfo *p);
 
 	void PrimaryAttack( void );
+	void SecondaryAttack( void );
 	int Swing( int fFirst );
 	BOOL Deploy( void );
 	void Holster( int skiplocal = 0 );
@@ -982,4 +1023,234 @@ public:
 private:
 	unsigned short m_usSnarkFire;
 };
+class CSawnoff : public CBasePlayerWeapon
+{
+public:
+#ifndef CLIENT_DLL
+#endif
+	void Spawn( void );
+	void Precache( void );
+	int iItemSlot( ) { return 3; }
+	int GetItemInfo(ItemInfo *p);
+	int AddToPlayer( CBasePlayer *pPlayer );
+
+	void PrimaryAttack( void );
+	void SecondaryAttack( void );
+	BOOL Deploy( );
+	void Reload( void );
+	void WeaponIdle( void );
+	int m_fInReload;
+	float m_flNextReload;
+	int m_iShell;
+
+	virtual BOOL UseDecrement( void )
+	{
+#if defined( CLIENT_WEAPONS )
+		return TRUE;
+#else
+		return FALSE;
+#endif
+	}
+
+private:
+	unsigned short m_usDoubleFire;
+	unsigned short m_usSingleFire;
+};
+class CNeedle : public CBasePlayerWeapon
+{
+public:
+	void Spawn( void );
+	void Precache( void );
+	int iItemSlot( void ) { return 1; }
+	void EXPORT SwingAgain( void );
+	void EXPORT Smack( void );
+	int GetItemInfo(ItemInfo *p);
+
+	void PrimaryAttack( void );
+	int Swing( int fFirst );
+	BOOL Deploy( void );
+	void Holster( int skiplocal = 0 );
+	int m_iSwing;
+	TraceResult m_trHit;
+
+	virtual BOOL UseDecrement( void )
+	{ 
+#if defined( CLIENT_WEAPONS )
+		return TRUE;
+#else
+		return FALSE;
+#endif
+	}
+private:
+	unsigned short m_usNeedle;
+};
+class CSnipars : public CBasePlayerWeapon 
+{
+public: 
+void Spawn( void ); 
+void Precache( void ); 
+int iItemSlot( void ) { return 2; } 
+int GetItemInfo(ItemInfo *p); 
+int AddToPlayer( CBasePlayer *pPlayer ); 
+void PrimaryAttack( void ); 
+void SecondaryAttack( void ); 
+BOOL Deploy( void ); 
+void Holster( int skiplocal = 0 ); 
+void Reload( void ); 
+void WeaponIdle( void ); 
+void Shoot( float flSpread, float flCycleTime, BOOL fUseAutoAim ); 
+float m_flSoundDelay;
+
+BOOL m_fInZoom;// don't save this.
+
+virtual BOOL UseDecrement( void ) 
+{
+#if defined( CLIENT_WEAPONS ) 
+return TRUE; 
+#else 
+return FALSE; 
+#endif 
+}
+
+private: 
+unsigned short m_usFireSniper; 
+};
+class CGlock2 : public CBasePlayerWeapon
+{
+public:
+	void Spawn( void );
+	void Precache( void );
+	int iItemSlot( void ) { return 2; }
+	int GetItemInfo(ItemInfo *p);
+
+	void PrimaryAttack( void );
+	void SecondaryAttack( void );
+	void GlockFire( float flSpread, float flCycleTime, BOOL fUseAutoAim );
+	BOOL Deploy( void );
+	void Reload( void );
+	void WeaponIdle( void );
+
+	virtual BOOL UseDecrement( void )
+	{ 
+#if defined( CLIENT_WEAPONS )
+		return TRUE;
+#else
+		return FALSE;
+#endif
+	}
+
+private:
+	int m_iShell;
+
+	unsigned short m_usFireGlock1;
+	unsigned short m_usFireGlock2;
+};
+class CKatana : public CBasePlayerWeapon
+{
+public:
+	void Spawn( void );
+	void Precache( void );
+	int iItemSlot( void ) { return 1; }
+	void EXPORT SwingAgain( void );
+	void EXPORT Smack( void );
+	int GetItemInfo(ItemInfo *p);
+
+	void PrimaryAttack( void );
+	int Swing( int fFirst );
+	BOOL Deploy( void );
+	void Holster( int skiplocal = 0 );
+	int m_iSwing;
+	TraceResult m_trHit;
+
+	virtual BOOL UseDecrement( void )
+	{ 
+#if defined( CLIENT_WEAPONS )
+		return TRUE;
+#else
+		return FALSE;
+#endif
+	}
+private:
+	unsigned short m_usKatana;
+};
+class CRock : public CBasePlayerWeapon
+{
+public:
+	void Spawn( void );
+	void Precache( void );
+	int iItemSlot( void ) { return 5; }
+	int GetItemInfo(ItemInfo *p);
+
+	void PrimaryAttack( void );
+	BOOL Deploy( void );
+	BOOL CanHolster( void );
+	void Holster( int skiplocal = 0 );
+	void WeaponIdle( void );
+
+	virtual BOOL UseDecrement( void )
+	{ 
+#if defined( CLIENT_WEAPONS )
+		return TRUE;
+#else
+		return FALSE;
+#endif
+	}
+};
+class CPepsigun : public CBasePlayerWeapon
+{
+public:
+	void Spawn( void );
+	void Precache( void );
+	int iItemSlot( void ) { return 4; }
+	int GetItemInfo(ItemInfo *p);
+
+	void PrimaryAttack( void );
+	BOOL Deploy( void );
+	BOOL CanHolster( void );
+	void Holster( int skiplocal = 0 );
+	void WeaponIdle( void );
+
+	virtual BOOL UseDecrement( void )
+	{ 
+#if defined( CLIENT_WEAPONS )
+		return TRUE;
+#else
+		return FALSE;
+#endif
+	}
+};
+class CCrowbar2 : public CBasePlayerWeapon
+{
+public:
+	void Spawn( void );
+	void Precache( void );
+	int iItemSlot( ) { return 3; }
+	int GetItemInfo(ItemInfo *p);
+
+	void FireBolt( void );
+	void FireSniperBolt( void );
+	void PrimaryAttack( void );
+	int AddToPlayer( CBasePlayer *pPlayer );
+	BOOL Deploy( );
+	void Holster( int skiplocal = 0 );
+	void WeaponIdle( void );
+
+	int m_fInZoom; // don't save this
+
+	virtual BOOL UseDecrement( void )
+	{ 
+#if defined( CLIENT_WEAPONS )
+		return TRUE;
+#else
+		return FALSE;
+#endif
+	}
+
+private:
+	unsigned short m_usCrossbow12;
+	unsigned short m_usCrossbow22;
+};
+
+
 #endif // WEAPONS_H
+	

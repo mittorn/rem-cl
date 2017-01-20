@@ -356,6 +356,7 @@ void CGrenade::Spawn( void )
 	m_fRegisteredSound = FALSE;
 }
 
+
 CGrenade *CGrenade::ShootContact( entvars_t *pevOwner, Vector vecStart, Vector vecVelocity )
 {
 	CGrenade *pGrenade = GetClassPtr( (CGrenade *)NULL );
@@ -378,6 +379,45 @@ CGrenade *CGrenade::ShootContact( entvars_t *pevOwner, Vector vecStart, Vector v
 	pGrenade->SetTouch( &CGrenade::ExplodeTouch );
 
 	pGrenade->pev->dmg = gSkillData.plrDmgM203Grenade;
+
+	return pGrenade;
+}
+
+CGrenade *CGrenadeRock::ShootTimed( entvars_t *pevOwner, Vector vecStart, Vector vecVelocity, float time )
+{
+	CGrenade *pGrenade = GetClassPtr( (CGrenade *)NULL );
+	pGrenade->Spawn();
+	UTIL_SetOrigin( pGrenade->pev, vecStart );
+	pGrenade->pev->velocity = vecVelocity;
+	pGrenade->pev->angles = UTIL_VecToAngles( pGrenade->pev->velocity );
+	pGrenade->pev->owner = ENT( pevOwner );
+
+	pGrenade->SetTouch( &CGrenadeRock::BounceTouch );	// Bounce if touched
+
+	// Take one second off of the desired detonation time and set the think to PreDetonate. PreDetonate
+	// will insert a DANGER sound into the world sound list and delay detonation for one second so that 
+	// the grenade explodes after the exact amount of time specified in the call to ShootTimed(). 
+
+	pGrenade->pev->dmgtime = gpGlobals->time + time;
+	pGrenade->SetThink( &CGrenade::TumbleThink );
+	pGrenade->pev->nextthink = gpGlobals->time + 0.1;
+	if( time < 0.1 )
+	{
+		pGrenade->pev->nextthink = gpGlobals->time;
+		pGrenade->pev->velocity = Vector( 0, 0, 0 );
+	}
+
+	pGrenade->pev->sequence = RANDOM_LONG( 3, 6 );
+	pGrenade->pev->framerate = 1.0;
+
+	// Tumble through the air
+	// pGrenade->pev->avelocity.x = -400;
+
+	pGrenade->pev->gravity = 0.5;
+	pGrenade->pev->friction = 0.8;
+
+	SET_MODEL( ENT( pGrenade->pev ), "models/w_rock.mdl" );
+	pGrenade->pev->dmg = 100;
 
 	return pGrenade;
 }
@@ -449,6 +489,67 @@ CGrenade *CGrenade::ShootSatchelCharge( entvars_t *pevOwner, Vector vecStart, Ve
 
 	return pGrenade;
 }
+void CGrenadeRock::BounceTouch( CBaseEntity *pOther )
+{
+	// don't hit the guy that launched this grenade
+	if( pOther->edict() == pev->owner )
+		return;
+
+	// only do damage if we're moving fairly fast
+	if( m_flNextAttack < gpGlobals->time && pev->velocity.Length() > 100 )
+	{
+		entvars_t *pevOwner = VARS( pev->owner );
+		if( pevOwner )
+		{
+			TraceResult tr = UTIL_GetGlobalTrace();
+			ClearMultiDamage();
+			pOther->TraceAttack( pevOwner, 10, gpGlobals->v_forward, &tr, DMG_CLUB); 
+			ApplyMultiDamage( pev, pevOwner );
+		}
+		m_flNextAttack = gpGlobals->time + 1.0; // debounce
+	}
+
+	Vector vecTestVelocity;
+	// pev->avelocity = Vector( 300, 300, 300 );
+
+	// this is my heuristic for modulating the grenade velocity because grenades dropped purely vertical
+	// or thrown very far tend to slow down too quickly for me to always catch just by testing velocity. 
+	// trimming the Z velocity a bit seems to help quite a bit.
+	vecTestVelocity = pev->velocity; 
+	vecTestVelocity.z *= 0.45;
+
+	if( !m_fRegisteredSound && vecTestVelocity.Length() <= 60 )
+	{
+		//ALERT( at_console, "Grenade Registered!: %f\n", vecTestVelocity.Length() );
+
+		// grenade is moving really slow. It's probably very close to where it will ultimately stop moving. 
+		// go ahead and emit the danger sound.
+
+		// register a radius louder than the explosion, so we make sure everyone gets out of the way
+		CSoundEnt::InsertSound( bits_SOUND_DANGER, pev->origin, pev->dmg / 0.4, 0.3 );
+		m_fRegisteredSound = TRUE;
+	}
+
+	if( pev->flags & FL_ONGROUND )
+	{
+		// add a bit of static friction
+		pev->velocity = pev->velocity * 0.8;
+
+		pev->sequence = RANDOM_LONG( 1, 1 );
+	}
+	else
+	{
+		// play bounce sound
+		BounceSound();
+	}
+	pev->framerate = pev->velocity.Length() / 200.0;
+	if( pev->framerate > 1.0 )
+		pev->framerate = 1;
+	else if( pev->framerate < 0.5 )
+		pev->framerate = 0;
+}
+
+
 
 void CGrenade::UseSatchelCharges( entvars_t *pevOwner, SATCHELCODE code )
 {
@@ -479,5 +580,6 @@ void CGrenade::UseSatchelCharges( entvars_t *pevOwner, SATCHELCODE code )
 		pentFind = FIND_ENTITY_BY_CLASSNAME( pentFind, "grenade" );
 	}
 }
+
 
 //======================end grenade
